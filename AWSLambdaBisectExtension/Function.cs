@@ -4,6 +4,9 @@ using System.Text;
 
 using Amazon.Lambda.Core;
 using Amazon.Lambda.KinesisEvents;
+using AWSLambdaBisectExtension.Decorator;
+using Decorator.Core;
+using ShardStatistics;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -12,7 +15,14 @@ namespace AWSLambdaBisectExtension
 {
     public class Function
     {
+        public string FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
+        {
+            var bisectDecorator = new BisectExtensionConcreteDecorator<KinesisEvent, ILambdaContext, string>(new ConcreteCompMyProcessing(), new BisectConfig(), kinesisEvent.Records.Count, new CloudWatchShardMetrics());
+            return bisectDecorator.Handle(kinesisEvent, context);
+            //IoC on your dependencies
+        }
 
+        /* Original Processing Code
         public void FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
         {
             context.Logger.LogLine($"Beginning to process {kinesisEvent.Records.Count} records...");
@@ -36,6 +46,6 @@ namespace AWSLambdaBisectExtension
             {
                 return reader.ReadToEnd();
             }
-        }
-    }
+        }*/
+     }
 }
