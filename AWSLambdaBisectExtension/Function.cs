@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Amazon.Lambda.Core;
@@ -15,11 +17,20 @@ namespace AWSLambdaBisectExtension
 {
     public class Function
     {
-        public string FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
+        public void FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
         {
-            var bisectDecorator = new BisectExtensionConcreteDecorator<KinesisEvent, ILambdaContext, string>(new ConcreteCompMyProcessing(), new BisectConfig(), kinesisEvent.Records.Count, new CloudWatchShardMetrics());
-            return bisectDecorator.Handle(kinesisEvent, context);
-            //IoC on your dependencies
+            context.Logger.LogLine("===Init2");
+
+            if(kinesisEvent != null && kinesisEvent.Records != null && kinesisEvent.Records.Any())
+            {
+                var records = kinesisEvent.Records.Select(r => new Record(r.Kinesis.Data, new Dictionary<string, object> { ["functionName"] = context.FunctionName }));
+                var bisectDecorator = new BisectExtensionConcreteDecorator(new ConcreteCompMyProcessing(), new BisectConfig(), kinesisEvent.Records.Count, new CloudWatchShardMetrics());
+                bisectDecorator.Handle(records);
+            }
+            else
+            {
+                context.Logger.LogLine("No KinesisEvent records available");
+            }
         }
 
         /* Original Processing Code

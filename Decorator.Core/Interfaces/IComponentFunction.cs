@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AWSLambdaBisectExtension.Decorator
 {
-    public interface IComponentFunction<TArg1, TArg2, TResult>
+    //TODO actually is a good idea to have a type
+    public interface IComponentFunction
     {
-        TResult Handle(TArg1 arg1, TArg2 arg2);
+        IEnumerable<Record> Handle(IEnumerable<Record> records);
     }
 }

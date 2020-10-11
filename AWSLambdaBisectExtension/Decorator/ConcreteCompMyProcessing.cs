@@ -1,45 +1,66 @@
 ﻿using Amazon.Lambda.Core;
-using Amazon.Lambda.KinesisEvents;
+using AWSLambdaBisectExtension.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace AWSLambdaBisectExtension.Decorator
 {
-    public class ConcreteCompMyProcessing : IComponentFunction<KinesisEvent, ILambdaContext, string>
+    public class ConcreteCompMyProcessing : IComponentFunction
     {
-        public string Handle(KinesisEvent kinesisEvent, ILambdaContext context)
+        public IEnumerable<Record> Handle(IEnumerable<Record> records)
         {
-            context.Logger.LogLine($"Beginning to process {kinesisEvent.Records.Count} records...");
-
-            foreach (var record in kinesisEvent.Records)
+            var options = new JsonSerializerOptions
             {
-                context.Logger.LogLine($"Event ID: {record.EventId}");
-                context.Logger.LogLine($"Event Name: {record.EventName}");
+                PropertyNameCaseInsensitive = true,
+            };
+            //context.Logger.LogLine($"Beginning to process {records.Count()} records...");
+            var output = new List<Record>();
+            foreach (var record in records)
+            {
+                string recordData = GetRecordContents(record.Stream);
 
-                string recordData = GetRecordContents(record.Kinesis);
+                Console.WriteLine($"Record Data:{recordData}");
+                var deserialized = JsonSerializer.Deserialize<MyData>(recordData, options);
 
-                if (recordData.Equals("{trigger-bug}"))
+
+                Console.WriteLine($"Content:{deserialized.Content}");
+                //TODO Do some processing...
+                var processed = new MyData(deserialized.Id, deserialized.Content.ToUpper());
+
+
+                if (deserialized.Content.Equals("poison"))
                 {
                     throw new Exception("Unexpected bug/condition");
                 }
 
-                context.Logger.LogLine($"Record Data:");
-                context.Logger.LogLine(recordData);
+                var outContent = JsonSerializer.Serialize(processed);
+
+                output.Add(new Record (StringToStream(outContent), record.Headers));
             }
 
-            context.Logger.LogLine("Stream processing complete.");
-            return "OK";
+            return output;
         }
 
-        private string GetRecordContents(KinesisEvent.Record streamRecord)
+        private string GetRecordContents(Stream record)
         {
-            using (var reader = new StreamReader(streamRecord.Data, Encoding.ASCII))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(record, Encoding.ASCII);
+
+            byte[] data = Convert.FromBase64String(reader.ReadToEnd());
+            string decodedString = Encoding.UTF8.GetString(data);
+            return decodedString;
+        }
+
+        public static Stream StringToStream(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
     }
 }
