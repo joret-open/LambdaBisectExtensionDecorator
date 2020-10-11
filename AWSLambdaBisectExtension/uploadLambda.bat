@@ -1,0 +1,1 @@
+dotnet lambda deploy-function --profile demo --region eu-west-1
