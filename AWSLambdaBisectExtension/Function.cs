@@ -19,17 +19,18 @@ namespace AWSLambdaBisectExtension
     {
         public void FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
         {
-            context.Logger.LogLine("===Init2");
+            var totalReceived = kinesisEvent.Records.Count;
+            context.Logger.LogLine($"===Init, received{totalReceived}");
 
             if(kinesisEvent != null && kinesisEvent.Records != null && kinesisEvent.Records.Any())
             {
                 var records = kinesisEvent.Records.Select(r => new Record(r.Kinesis.Data, new Dictionary<string, object> { ["functionName"] = context.FunctionName }));
-                var bisectDecorator = new BisectExtensionConcreteDecorator(new ConcreteCompMyProcessing(), new BisectConfig(), kinesisEvent.Records.Count, new CloudWatchShardMetrics());
+                var bisectDecorator = new BisectExtensionConcreteDecorator(new ConcreteCompMyProcessing(), new BisectConfig(), totalReceived, new CloudWatchShardMetrics());
                 bisectDecorator.Handle(records);
             }
             else
             {
-                context.Logger.LogLine("No KinesisEvent records available");
+                context.Logger.LogLine("===No KinesisEvent records available");
             }
         }
 

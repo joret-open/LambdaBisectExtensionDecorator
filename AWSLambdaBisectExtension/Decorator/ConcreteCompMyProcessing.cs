@@ -22,18 +22,18 @@ namespace AWSLambdaBisectExtension.Decorator
             {
                 string recordData = GetRecordContents(record.Stream);
 
-                Console.WriteLine($"Record Data:{recordData}");
+                Console.WriteLine($"===Record Data:{recordData}");
                 var deserialized = JsonSerializer.Deserialize<MyData>(recordData, options);
 
 
-                Console.WriteLine($"Content:{deserialized.Content}");
+                //Console.WriteLine($"Content:{deserialized.Content}");
                 //TODO Do some processing...
                 var processed = new MyData(deserialized.Id, deserialized.Content.ToUpper());
 
 
                 if (deserialized.Content.Equals("poison"))
                 {
-                    throw new Exception("Unexpected bug/condition");
+                    throw new Exception("===Unexpected bug/condition");
                 }
 
                 var outContent = JsonSerializer.Serialize(processed);
