@@ -22,7 +22,7 @@ namespace AWSLambdaBisectExtension.Decorator
             {
                 string recordData = GetRecordContents(record.Stream);
 
-                Console.WriteLine($"===Record Data:{recordData}");
+                //Console.WriteLine($"===Record Data:{recordData}");
                 var deserialized = JsonSerializer.Deserialize<MyData>(recordData, options);
 
 

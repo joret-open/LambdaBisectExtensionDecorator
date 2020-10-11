@@ -31,7 +31,7 @@ namespace Decorator.Core
             {
                 if (_recordsInBatch == _config.AllowedErrorsPerBatch)
                 {
-                    Console.WriteLine("Minimum errors in records accepted, continue processing without exception");
+                    Console.WriteLine("===Minimum errors in records accepted, continue processing without exception");
                     return default;
                 }
                 else
