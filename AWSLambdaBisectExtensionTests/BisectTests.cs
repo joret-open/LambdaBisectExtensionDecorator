@@ -1,10 +1,6 @@
-using Amazon.Kinesis;
-using Amazon.Lambda.Core;
-using Amazon.Lambda.KinesisEvents;
 using AWSLambdaBisectExtension.Decorator;
 using Decorator.Core;
 using Moq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

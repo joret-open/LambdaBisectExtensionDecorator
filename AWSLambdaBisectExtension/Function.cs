@@ -20,7 +20,7 @@ namespace AWSLambdaBisectExtension
         public void FunctionHandler(KinesisEvent kinesisEvent, ILambdaContext context)
         {
             var totalReceived = kinesisEvent.Records.Count;
-            context.Logger.LogLine($"===Init, received{totalReceived}");
+            context.Logger.LogLine($"===Init===, received{totalReceived}");
 
             if(kinesisEvent != null && kinesisEvent.Records != null && kinesisEvent.Records.Any())
             {
