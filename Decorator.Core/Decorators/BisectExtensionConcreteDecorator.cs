@@ -36,6 +36,7 @@ namespace Decorator.Core
                 }
                 else
                 {
+                    Console.WriteLine("===Too many records to discard. Throw Exception and Bisect");
                     throw;
                 }
             }
